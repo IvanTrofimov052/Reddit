@@ -3,6 +3,7 @@
 # to do send code to email
 # to save code with data in db
 from .checking import *
+import uuid
 
 
 # this function need to create account with your email
@@ -20,7 +21,8 @@ def creating_account_with_email_handler(request):
 	elif checking_age_of_user(user_age) == False:
 		return "the age is not right"
 
-	# make session
-	request.session['name'] = 'Ludwik'
+	# making session with random values
+	my_uuid = uuid.uuid4()
+	request.session["SessionForConfirmEmail"] = str(my_uuid)
 
-	return "Ok, Now we send to your account code"
+	return request.session["SessionForConfirmEmail"]
