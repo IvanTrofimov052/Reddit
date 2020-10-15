@@ -4,7 +4,9 @@
 # to do method of making the accounts in othere function
 # to do collect the image
 # to do pep8
+# to do asynco
 from django.http import HttpResponse
+from .creating_account import *
 
 
 def index(request):
@@ -14,15 +16,11 @@ def index(request):
 def sign_up_handler(request):
 	methond_of_creating_account = request.GET['methond_of_creating_account']
 
-	# there we getting information about user
-	user_age = request.GET['user_age']
-	user_name = request.GET['user_name']
+	# there we get the user password
 	user_password = request.GET['user_password']
 
 	# there we checking the methond of creating account
 	if methond_of_creating_account == "email":
-		user_email = request.GET['user_email']
+		return HttpResponse(creating_account_with_email_handler(request))
 	else:
 		return HttpResponse('Hacker!!!!!')
-
-	return HttpResponse(user_email + '</br>' + user_age + '</br>' + user_name)
