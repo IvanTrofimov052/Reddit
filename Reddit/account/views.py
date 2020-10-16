@@ -5,6 +5,7 @@
 # to do collect the image
 # to do pep8
 # to do asynco
+# dont forgot about hash
 from django.http import HttpResponse
 from .creating_account import *
 
@@ -21,6 +22,6 @@ def sign_up_handler(request):
 
 	# there we checking the methond of creating account
 	if methond_of_creating_account == "email":
-		return HttpResponse(creating_account_with_email_handler(request))
+		return HttpResponse(creating_account_with_email_handler(request, user_password))
 	else:
 		return HttpResponse('Hacker!!!!!')

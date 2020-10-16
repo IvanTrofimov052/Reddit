@@ -1,13 +1,15 @@
 # dont forgot about xss in the nickname
-# to do creating new seesion
 # to do send code to email
-# to save code with data in db
+# to do delting 
 from .checking import *
 import uuid
+from .models import UserThatConfirmEmail
+from django.utils.crypto import get_random_string
+from django.contrib.auth.hashers import check_password, make_password
 
 
 # this function need to create account with your email
-def creating_account_with_email_handler(request):
+def creating_account_with_email_handler(request, user_password):
 	# there we getting information about user
 	user_age = request.GET['user_age']
 	user_name = request.GET['user_name']
@@ -25,4 +27,17 @@ def creating_account_with_email_handler(request):
 	my_uuid = uuid.uuid4()
 	request.session["SessionForConfirmEmail"] = str(my_uuid)
 
-	return request.session["SessionForConfirmEmail"]
+	# there we make aconfirmed code
+	confirm_code = get_random_string(length=4, allowed_chars='1234567890')
+
+	# thre we save that user
+	new_user_that_confirm_email = UserThatConfirmEmail()
+	new_user_that_confirm_email.user_session = request.session["SessionForConfirmEmail"]
+	new_user_that_confirm_email.user_age = user_age
+	new_user_that_confirm_email.user_name = user_name
+	new_user_that_confirm_email.user_email = user_email
+	new_user_that_confirm_email.user_password = make_password(user_password) # hash
+	new_user_that_confirm_email.user_code = confirm_code
+	new_user_that_confirm_email.save()
+
+	return "ok"

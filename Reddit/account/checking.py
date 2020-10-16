@@ -1,8 +1,13 @@
+from .models import UserThatConfirmEmail
 import re
 
 
 # this function is checking the email adress
 def checking_email_adress(email):
+	# cheking if this email we have in our db
+	if UserThatConfirmEmail.objects.filter(user_email = email):
+		return False
+
 	match = re.search('@', email)
 
 	return bool(match)
@@ -21,5 +26,9 @@ def checking_age_of_user(age):
 
 
 # this function is cheking the user name of user
-def checking_name_of_user(age):
+def checking_name_of_user(name):
+	# cheking if this user name we have in our db
+	if UserThatConfirmEmail.objects.filter(user_name = name):
+		return False
+
 	return True
