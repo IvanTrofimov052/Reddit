@@ -8,6 +8,7 @@
 # dont forgot about hash
 from django.http import HttpResponse
 from .creating_account import *
+from .models import UserThatConfirmEmail
 
 
 def index(request):
@@ -25,3 +26,38 @@ def sign_up_handler(request):
 		return HttpResponse(creating_account_with_email_handler(request, user_password))
 	else:
 		return HttpResponse('Hacker!!!!!')
+
+
+def confirm_code_handler(request):
+	# getting the code
+	writing_code = request.GET['confirm_code']
+
+	# there we checking have we there user
+	if UserThatConfirmEmail.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
+		# get this user
+		user_that_confirm_code = UserThatConfirmEmail.objects.get(user_session = request.session["SessionForConfirmEmail"])
+
+		# get the right code and number attemps
+		confirm_code = user_that_confirm_code.confirm_code
+		number_attempts = user_that_confirm_code.number_attempts
+
+		#checking if the user write not right code
+		if confirm_code == writing_code:
+			# there need to create new user and delete from old db
+			return HttpResponse("ok")
+
+		# checking if this people is making a lot of attemps
+		if number_attempts > 4:
+			# delete user beause there more then 4 attemps it means that people not know yhe code
+			user_that_confirm_code.delete()
+
+			return HttpResponse('not right we block your account')
+		else:
+			# it was not right code attemps is rising
+			user_that_confirm_code.number_attempts += 1
+			user_that_confirm_code.save()
+
+			return HttpResponse('not right')
+
+
+	return HttpResponse('You havent register go SignUp and register')

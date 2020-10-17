@@ -3,6 +3,7 @@
 # to do delting 
 from .checking import *
 import uuid
+from .send_email import *
 from .models import UserThatConfirmEmail
 from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import check_password, make_password
@@ -30,6 +31,9 @@ def creating_account_with_email_handler(request, user_password):
 	# there we make aconfirmed code
 	confirm_code = get_random_string(length=4, allowed_chars='1234567890')
 
+	# there we sending email with code
+	sending_email(user_email, str(confirm_code) + " your confirm code")
+
 	# thre we save that user
 	new_user_that_confirm_email = UserThatConfirmEmail()
 	new_user_that_confirm_email.user_session = request.session["SessionForConfirmEmail"]
@@ -37,7 +41,7 @@ def creating_account_with_email_handler(request, user_password):
 	new_user_that_confirm_email.user_name = user_name
 	new_user_that_confirm_email.user_email = user_email
 	new_user_that_confirm_email.user_password = make_password(user_password) # hash
-	new_user_that_confirm_email.user_code = confirm_code
+	new_user_that_confirm_email.confirm_code  = confirm_code
 	new_user_that_confirm_email.save()
 
 	return "ok"
