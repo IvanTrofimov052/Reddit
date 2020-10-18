@@ -32,7 +32,7 @@ def creating_account_with_email_handler(request, user_password):
 	confirm_code = get_random_string(length=4, allowed_chars='1234567890')
 
 	# there we sending email with code
-	sending_email(user_email, str(confirm_code) + " your confirm code")
+	sending_email(user_email, str(confirm_code) + " your confirmation code")
 
 	# thre we save that user
 	new_user_that_confirm_email = UserThatConfirmEmail()

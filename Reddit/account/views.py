@@ -8,7 +8,8 @@
 # dont forgot about hash
 from django.http import HttpResponse
 from .creating_account import *
-from .models import UserThatConfirmEmail
+from .models import UserThatConfirmEmail, User
+from django.contrib.auth.hashers import check_password, make_password
 
 
 def index(request):
@@ -41,9 +42,27 @@ def confirm_code_handler(request):
 		confirm_code = user_that_confirm_code.confirm_code
 		number_attempts = user_that_confirm_code.number_attempts
 
+		# getting information about user
+		user_session = user_that_confirm_code.user_session
+		user_age = user_that_confirm_code.user_age
+		user_name = user_that_confirm_code.user_name
+		user_email = user_that_confirm_code.user_email
+		user_password = user_that_confirm_code.user_password
+
 		#checking if the user write not right code
 		if confirm_code == writing_code:
-			# there need to create new user and delete from old db
+			# creating new user
+			new_user = User()
+			new_user.user_session = user_session
+			new_user.user_age = user_age
+			new_user.user_name = user_name
+			new_user.user_email = user_email
+			new_user.user_password = user_password
+			new_user.save()
+
+			# delete of confirming users
+			user_that_confirm_code.delete()
+
 			return HttpResponse("ok")
 
 		# checking if this people is making a lot of attemps
@@ -61,3 +80,27 @@ def confirm_code_handler(request):
 
 
 	return HttpResponse('You havent register go SignUp and register')
+
+
+def sign_in_handler(request):
+	# getting information
+	user_name = request.GET['user_name']
+	user_password = request.GET['user_password']
+
+	# cheking if the session of user is busy
+	if User.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
+		return HttpResponse('Your session is busy')
+
+	# cheking have we there user
+	if User.objects.filter(user_name = user_name):
+		# getting the right password
+		user = User.objects.get(user_name = user_name)
+		right_password = user.user_password
+
+		# checking the password
+		if user.check_password(user_password):
+			return HttpResponse('nice')
+		else:
+			return HttpResponse('not right password')
+
+	return HttpResponse('We havent this user')
