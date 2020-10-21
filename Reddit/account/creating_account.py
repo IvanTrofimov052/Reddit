@@ -7,6 +7,7 @@ from .send_email import *
 from .models import UserThatConfirmEmail
 from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import check_password, make_password
+from .hash import *
 
 
 # this function need to create account with your email
@@ -40,7 +41,7 @@ def creating_account_with_email_handler(request, user_password):
 	new_user_that_confirm_email.user_age = user_age
 	new_user_that_confirm_email.user_name = user_name
 	new_user_that_confirm_email.user_email = user_email
-	new_user_that_confirm_email.user_password = make_password(user_password) # hash
+	new_user_that_confirm_email.user_password = hashing_passwords(user_password) # hash
 	new_user_that_confirm_email.confirm_code  = confirm_code
 	new_user_that_confirm_email.save()
 

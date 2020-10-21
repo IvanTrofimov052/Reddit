@@ -6,10 +6,12 @@
 # to do pep8
 # to do asynco
 # dont forgot about hash
+# to do normal hashing
 from django.http import HttpResponse
 from .creating_account import *
-from .models import UserThatConfirmEmail, User
+from .models import UserThatConfirmEmail, User, Session
 from django.contrib.auth.hashers import check_password, make_password
+from .hash import *
 
 
 def index(request):
@@ -53,7 +55,6 @@ def confirm_code_handler(request):
 		if confirm_code == writing_code:
 			# creating new user
 			new_user = User()
-			new_user.user_session = user_session
 			new_user.user_age = user_age
 			new_user.user_name = user_name
 			new_user.user_email = user_email
@@ -85,10 +86,10 @@ def confirm_code_handler(request):
 def sign_in_handler(request):
 	# getting information
 	user_name = request.GET['user_name']
-	user_password = request.GET['user_password']
+	user_password = hashing_passwords(request.GET['user_password'])
 
 	# cheking if the session of user is busy
-	if User.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
+	if Session.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
 		return HttpResponse('Your session is busy')
 
 	# cheking have we there user
@@ -98,9 +99,47 @@ def sign_in_handler(request):
 		right_password = user.user_password
 
 		# checking the password
-		if user.check_password(user_password):
+		if user_password == right_password:
+			# creting session
+			my_uuid = uuid.uuid4()
+			request.session["SessionForConfirmEmail"] = str(my_uuid)
+
+			# creating new session
+			new_session = Session(user = user,
+			 			  user_session = request.session["SessionForConfirmEmail"])
+			new_session.save()
+
 			return HttpResponse('nice')
 		else:
 			return HttpResponse('not right password')
 
 	return HttpResponse('We havent this user')
+
+
+def sign_out_handler(request):
+	# cheking have we there session
+	if Session.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
+		# getting this user and then delete
+		session = Session.objects.get(user_session = request.session["SessionForConfirmEmail"])
+		session.delete()
+
+		return HttpResponse('OK')
+
+	return HttpResponse('We havent your session')
+
+
+def change_password_handler(request):
+	# getting new password
+	new_password = request.GET['new_password']
+
+	# cheking have we there session
+	if Session.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
+		# get new user and update his password
+		user = Session.objects.get(user_session = request.session["SessionForConfirmEmail"]).user
+		user.user_password = hashing_passwords(new_password)
+		user.save()
+
+		return HttpResponse('OK')
+
+	return HttpResponse('We havent your session')
+
