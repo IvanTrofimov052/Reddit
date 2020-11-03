@@ -10,4 +10,5 @@ urlpatterns = [
     path('MakeComment/<str:user_name>/<str:label_text>', views.make_comment_handler, name='index'),
     # ex: GetAllComments/IvanTroifmov052/CoolArticle
     path('GetAllComments/<str:user_name>/<str:label_text>', views.get_all_comments_of_article_handler, name='index'),
+    path('LastArticles', views.get_last_articles_handler, name='index'),
 ]
