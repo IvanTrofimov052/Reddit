@@ -1,7 +1,9 @@
 # ToDo: upload images
 # ToDo: Search
-# ToDo: upvote
-# ToDo: hashtag
+# 3 ToDo: hashtag
+# ToDo: custom 404
+# 1 ToDo: have i vote yet
+# 2 ToDO get some of articles
 import json
 
 from datetime import datetime
@@ -10,7 +12,13 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from account.models import User, Session
-from .models import Article, Comment
+from .models import Article, Comment, Vote
+
+
+vote = {
+	"up":1,
+	"down":-1
+}
 
 
 # this function handler the create post
@@ -56,6 +64,7 @@ def get_article_handler(request, user_name, label_text):
 			article_text_label = article.text_label
 			article_pub_date = article.pub_date
 			article_user_name = article.user.user_name
+			article_votes = article.votes
 
 			# make json
 			response_data = {}
@@ -63,6 +72,7 @@ def get_article_handler(request, user_name, label_text):
 			response_data['text'] = article_text
 			response_data['pub_date'] = article_pub_date
 			response_data['user_name'] = article_user_name
+			response_data['vote'] = article_votes
 
 			return JsonResponse(response_data)
 
@@ -149,10 +159,101 @@ def get_last_articles_handler(request):
 		article_text_label = article.text_label
 		user_name = article.user.user_name
 		pub_date = article.pub_date
+		votes = article.votes
 
 		response_data[i+1] = {}
 		response_data[i+1]['text_label'] = article_text_label
 		response_data[i+1]['user_name'] = user_name
 		response_data[i+1]['pub_date'] = pub_date
+		response_data[i+1]['votes'] = votes
+
+	return JsonResponse(response_data)
+
+
+def make_vote_handler(request, user_name, label_text):
+	# check have we there user
+	if Session.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
+		# get the user that make article
+		article_user = User.objects.get(user_name = user_name)
+
+		# cheking have this user there article
+		if Article.objects.filter(user = article_user, text_label = label_text):
+			# get the user and article
+			user = Session.objects.get(user_session = request.session["SessionForConfirmEmail"]).user
+			article = Article.objects.get(user = article_user, text_label = label_text)
+
+			# get the vote
+			votting = request.GET['vote']
+
+			#cheking was this user make vote
+			if Vote.objects.filter(article = article, user = user):
+				if votting == "down" or votting == "up":
+					# change the vote
+					make_vote = Vote.objects.get(article = article, user = user)
+
+					# change the numbers of votes
+					article.votes += vote[make_vote.vote] * (-1) + vote[votting]
+					article.save()
+
+					make_vote.vote = votting
+		
+					make_vote.save()
+
+					return HttpResponse("200")
+
+				# delete a vote
+				make_vote = Vote.objects.get(article = article, user = user)
+
+				# change the numbers of votes
+				article.votes += vote[make_vote.vote] * (-1)
+				article.save()
+
+				make_vote.delete()
+
+				return HttpResponse("200")
+
+			if votting == "down" or votting == "up":
+				# make a new vote
+				make_vote = Vote()
+
+				make_vote.article = article
+				make_vote.user = user
+				make_vote.vote = votting
+
+				make_vote.save()
+
+				#change the numbers of votes
+				article.votes += vote[votting]
+				article.save()
+
+				return  HttpResponse("200")
+
+			return  HttpResponse("not right vote")
+
+		return HttpResponse("we havent this article")
+
+	return HttpResponse("You not register")
+
+
+def most_vote_handler(request):
+	# get last five articles
+	last_articles = Article.objects.order_by('-votes')[:5]
+
+	# make a responce data
+	response_data = {}
+	response_data["max_id"] = len(last_articles)
+
+	for i in range(len(last_articles)):
+		article = last_articles[i]
+		article_text_label = article.text_label
+		user_name = article.user.user_name
+		pub_date = article.pub_date
+		votes = article.votes
+
+		response_data[i+1] = {}
+		response_data[i+1]['text_label'] = article_text_label
+		response_data[i+1]['user_name'] = user_name
+		response_data[i+1]['pub_date'] = pub_date
+		response_data[i+1]['votes'] = votes
 
 	return JsonResponse(response_data)

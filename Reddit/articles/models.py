@@ -7,6 +7,7 @@ class Article(models.Model):
     text_label = models.CharField(max_length=200)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     pub_date = models.DateTimeField('date published')
+    votes = models.IntegerField(default=0)
 
 
 class Comment(models.Model):
@@ -14,3 +15,8 @@ class Comment(models.Model):
 	pub_date = models.DateTimeField('date published')
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	article = models.ForeignKey(Article, on_delete=models.CASCADE)
+
+class Vote(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	article = models.ForeignKey(Article, on_delete=models.CASCADE)
+	vote = models.CharField(max_length=200)

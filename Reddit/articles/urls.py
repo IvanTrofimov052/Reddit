@@ -11,4 +11,6 @@ urlpatterns = [
     # ex: GetAllComments/IvanTroifmov052/CoolArticle
     path('GetAllComments/<str:user_name>/<str:label_text>', views.get_all_comments_of_article_handler, name='index'),
     path('LastArticles', views.get_last_articles_handler, name='index'),
+    path('Vote/<str:user_name>/<str:label_text>', views.make_vote_handler, name='index'),
+    path('MostVote', views.most_vote_handler, name='index'),
 ]
