@@ -88,32 +88,33 @@ def sign_in_handler(request):
 	user_name = request.GET['user_name']
 	user_password = hashing_passwords(request.GET['user_password'])
 
-	# cheking if the session of user is busy
-	if Session.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
-		return HttpResponse('Your session is busy')
+	try:
+		# cheking if the session of user is busy
+		if Session.objects.filter(user_session = request.session["SessionForConfirmEmail"]):
+			return HttpResponse('Your session is busy')
+	except:
+		# cheking have we there user
+		if User.objects.filter(user_name = user_name):
+			# getting the right password
+			user = User.objects.get(user_name = user_name)
+			right_password = user.user_password
 
-	# cheking have we there user
-	if User.objects.filter(user_name = user_name):
-		# getting the right password
-		user = User.objects.get(user_name = user_name)
-		right_password = user.user_password
+			# checking the password
+			if user_password == right_password:
+				# creting session
+				my_uuid = uuid.uuid4()
+				request.session["SessionForConfirmEmail"] = str(my_uuid)
 
-		# checking the password
-		if user_password == right_password:
-			# creting session
-			my_uuid = uuid.uuid4()
-			request.session["SessionForConfirmEmail"] = str(my_uuid)
+				# creating new session
+				new_session = Session(user = user,
+				 			  user_session = request.session["SessionForConfirmEmail"])
+				new_session.save()
 
-			# creating new session
-			new_session = Session(user = user,
-			 			  user_session = request.session["SessionForConfirmEmail"])
-			new_session.save()
+				return HttpResponse('nice')
+			else:
+				return HttpResponse('not right password')
 
-			return HttpResponse('nice')
-		else:
-			return HttpResponse('not right password')
-
-	return HttpResponse('We havent this user')
+		return HttpResponse('We havent this user')
 
 
 def sign_out_handler(request):

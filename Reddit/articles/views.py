@@ -2,7 +2,6 @@
 # ToDo: Search
 # 3 ToDo: hashtag
 # ToDo: custom 404
-# 1 ToDo: have i vote yet
 # 2 ToDO get some of articles
 import json
 
@@ -13,6 +12,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from account.models import User, Session
 from .models import Article, Comment, Vote
+from .service import *
 
 
 vote = {
@@ -257,3 +257,24 @@ def most_vote_handler(request):
 		response_data[i+1]['votes'] = votes
 
 	return JsonResponse(response_data)
+
+
+def have_user_vote_yet(request, user_name, label_text):
+	"""This function is check vote this user yet"""
+	session = request.session["SessionForConfirmEmail"]
+
+	try:
+		vote_yet = checking_vote_user_yet(session, user_name, label_text)
+
+		return JsonResponse({'vote_yet':vote_yet})
+	except:
+		return JsonResponse({'eror':'we havent this article'})
+
+
+def get_lent_handler(request):
+	"""this function is making lent for user"""
+
+	try:
+		return JsonResponse(make_lent(num=5))
+	except:
+		return JsonResponse({'eror':'we havent your session'})

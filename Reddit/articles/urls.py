@@ -13,4 +13,6 @@ urlpatterns = [
     path('LastArticles', views.get_last_articles_handler, name='index'),
     path('Vote/<str:user_name>/<str:label_text>', views.make_vote_handler, name='index'),
     path('MostVote', views.most_vote_handler, name='index'),
+    path('VoteYet/<str:user_name>/<str:label_text>', views.have_user_vote_yet, name='index'),
+    path('GetLent', views.get_lent_handler, name='index')
 ]
