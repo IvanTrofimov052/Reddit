@@ -2,7 +2,6 @@
 # ToDo: Search
 # 3 ToDo: hashtag
 # ToDo: custom 404
-# 2 ToDO get some of articles
 import json
 
 from datetime import datetime
@@ -147,27 +146,7 @@ def get_all_comments_of_article_handler(request, user_name, label_text):
 
 
 def get_last_articles_handler(request):
-	# get last five articles
-	last_articles = Article.objects.order_by('-pub_date')[:5]
-
-	# make a responce data
-	response_data = {}
-	response_data["max_id"] = len(last_articles)
-
-	for i in range(len(last_articles)):
-		article = last_articles[i]
-		article_text_label = article.text_label
-		user_name = article.user.user_name
-		pub_date = article.pub_date
-		votes = article.votes
-
-		response_data[i+1] = {}
-		response_data[i+1]['text_label'] = article_text_label
-		response_data[i+1]['user_name'] = user_name
-		response_data[i+1]['pub_date'] = pub_date
-		response_data[i+1]['votes'] = votes
-
-	return JsonResponse(response_data)
+	return JsonResponse(make_responce_last_articles())
 
 
 def make_vote_handler(request, user_name, label_text):
@@ -236,27 +215,7 @@ def make_vote_handler(request, user_name, label_text):
 
 
 def most_vote_handler(request):
-	# get last five articles
-	last_articles = Article.objects.order_by('-votes')[:5]
-
-	# make a responce data
-	response_data = {}
-	response_data["max_id"] = len(last_articles)
-
-	for i in range(len(last_articles)):
-		article = last_articles[i]
-		article_text_label = article.text_label
-		user_name = article.user.user_name
-		pub_date = article.pub_date
-		votes = article.votes
-
-		response_data[i+1] = {}
-		response_data[i+1]['text_label'] = article_text_label
-		response_data[i+1]['user_name'] = user_name
-		response_data[i+1]['pub_date'] = pub_date
-		response_data[i+1]['votes'] = votes
-
-	return JsonResponse(response_data)
+	return JsonResponse(make_responce_most_votes())
 
 
 def have_user_vote_yet(request, user_name, label_text):

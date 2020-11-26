@@ -42,6 +42,7 @@ def get_max_id_article():
 
 	return max_id
 
+
 def get_Article_by_id(id):
 	try:
 		# get article
@@ -50,6 +51,44 @@ def get_Article_by_id(id):
 		return article
 	except:
 		return null
+
+
+def get_most_votes_articles(num=5):
+	# get last five articles
+	most_vote_articles = Article.objects.order_by('-votes')[:num]
+
+	return most_vote_articles
+
+
+def get_last_articles(num=5):
+	# get last five articles
+	last_articles = Article.objects.order_by('-pub_date')[:5]
+
+	return last_articles
+
+
+def make_responce_of_array_articles(articles_array):
+	response_data = {}
+	response_data["max_id"] = len(articles_array)
+
+	for i in range(len(articles_array)):
+		article = articles_array[i]
+
+		response_data[i+1] = get_information_about_article(article)
+
+	return response_data
+
+
+def make_responce_most_votes():
+	most_vote_articles = get_most_votes_articles()
+
+	return make_responce_of_array_articles(most_vote_articles)
+
+
+def make_responce_last_articles():
+	last_articles = get_last_articles()
+
+	return make_responce_of_array_articles(last_articles)
 
 
 def get_information_about_article(article):
